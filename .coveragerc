@@ -1,0 +1,11 @@
+# Settings for "pytest --cov". Only the app's own code is measured.
+[run]
+source = analytics
+branch = True
+# Only starts the program, so there's nothing to test in it.
+omit = analytics/__main__.py
+
+[report]
+show_missing = True
+# The run fails if coverage ever drops below this.
+fail_under = 95
