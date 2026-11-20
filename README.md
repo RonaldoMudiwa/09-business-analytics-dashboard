@@ -9,8 +9,9 @@ APIs, NLP and search. This week is about data analysis with Pandas.
 
 ## Status
 
-Day 1 of 7. Reading sales files, cleaning messy rows with a report of what
-was fixed, and money kept in whole pennies. 34 tests.
+Day 2 of 7. Reading sales files, cleaning messy rows with a report of what
+was fixed, money kept in whole pennies, KPIs, and filters that can be
+combined. 67 tests.
 
 ## Getting started
 
@@ -99,6 +100,67 @@ into pounds when shown (`format_pounds(9999)` gives `£99.99`).
 Computers store decimals like 0.1 slightly wrongly, so adding up thousands
 of prices as floats can end up a penny out. Whole numbers are always
 exact. It's like a till counting coins instead of guessing their weight.
+
+## KPIs
+
+KPI stands for key performance indicator: the handful of numbers a manager
+checks first.
+
+```python
+from analytics import calculate_kpis
+
+for kpi in calculate_kpis(sales):
+    print(f"{kpi.label:<16}{kpi.text:>14}")
+```
+
+```
+Revenue            £534,813.10
+Gross profit       £268,707.10
+Profit margin            50.2%
+Orders                   3,205
+Average order          £166.87
+Customers                  565
+Units sold               8,190
+```
+
+| KPI | What it means |
+| --- | --- |
+| Revenue | All the money taken |
+| Gross profit | Revenue minus what the shop paid for the stock |
+| Profit margin | How much of each £1 taken is profit. 50% means 50p in every £1 |
+| Orders | How many orders. One order can have several rows, one per product, so order ids are counted, not rows |
+| Average order | What a customer spends in one go |
+| Customers | How many different customers bought something |
+| Units sold | How many items went out of the door |
+
+Each KPI is its own small class behind the `Metric` base class, with one
+job: work out its number, and show it nicely (money metrics show pounds,
+the margin shows a percentage). Adding a new KPI means adding one class.
+Every metric copes with no sales at all and gives 0, rather than crashing
+with a divide by zero.
+
+## Filters
+
+```python
+from analytics import DateRange, IsOneOf
+
+summer_london = DateRange("2026-06-01", "2026-08-31") & IsOneOf("region", ["London"])
+print(summer_london.describe())     # 2026-06-01 to 2026-08-31 and region is London
+calculate_kpis(summer_london.apply(sales))
+```
+
+Filters work like the filter buttons on a shopping site, stacked on top of
+each other. `&` means "and", `|` means "or", and `~` means "not".
+
+| Filter | Keeps |
+| --- | --- |
+| `DateRange(start, end)` | Sales between two dates, both days included. Either end can be left open |
+| `DateRange.month("2026-10")` | One whole month |
+| `IsOneOf(column, values)` | e.g. region is London or North. Ignores case |
+| `Everything()` | Every row |
+
+Every filter can describe itself in plain English, so a report can say
+exactly what it's showing.
 
 ## Week plan
 
