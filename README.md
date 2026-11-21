@@ -9,9 +9,9 @@ APIs, NLP and search. This week is about data analysis with Pandas.
 
 ## Status
 
-Day 2 of 7. Reading sales files, cleaning messy rows with a report of what
-was fixed, money kept in whole pennies, KPIs, and filters that can be
-combined. 67 tests.
+Day 3 of 7. Reading sales files, cleaning messy rows with a report of what
+was fixed, money kept in whole pennies, KPIs, filters, breakdowns by month,
+category, region and product, pivot tables, and comparing periods. 92 tests.
 
 ## Getting started
 
@@ -161,6 +161,77 @@ each other. `&` means "and", `|` means "or", and `~` means "not".
 
 Every filter can describe itself in plain English, so a report can say
 exactly what it's showing.
+
+## Breakdowns
+
+A total says "we took £534k". A breakdown says where it came from.
+
+```python
+from analytics import Breakdown, pivot
+
+Breakdown("category").table(sales)            # one row per category
+Breakdown("month").table(sales)               # one row per month, in date order
+Breakdown("product").top(sales, 5, by="units")
+pivot(sales, "region", "category")            # regions down the side, categories across
+```
+
+```
+              revenue    profit  orders  units     share    margin
+category
+Camping      28667311  12559511    1476   2189  0.536025  0.438113
+Footwear     10080418   5409118    1101   1582  0.188485  0.536597
+Clothing      9718296   5896096    1506   2204  0.181714  0.606701
+Accessories   5015285   3005985    1468   2215  0.093776  0.599365
+```
+
+(Money is in pennies here. The dashboard on Day 5 shows pounds.)
+
+This is pandas' `groupby`: put the rows into piles by one column, then add
+up each pile. It's like sorting receipts into envelopes, one per category,
+and totalling each envelope. `share` is each pile's part of all revenue,
+and `margin` is its profit for every £1 taken.
+
+Camping brings in over half the money but has the lowest margin. Clothing
+and accessories make more profit per £1. That's the kind of thing a
+breakdown shows that a total can't.
+
+You can break down by `month`, `category`, `region`, `channel`, `product`
+or `customer_id`. `pivot()` makes a grid like a spreadsheet pivot table,
+with a Total row and column.
+
+## Comparing periods
+
+"We took £25k in October" means little on its own. Compared with
+September, it means something.
+
+```python
+from analytics import DateRange, compare, latest_month, previous_period
+
+october = DateRange.month(latest_month(sales))
+for c in compare(sales, october, previous_period(october)):
+    print(f"{c.label:<15}{c.current_text:>12}{c.previous_text:>12}  {c.arrow()} {c.percent_text()}")
+```
+
+```
+Revenue          £25,718.29  £21,728.39  ▲ +18.4%
+Gross profit     £12,721.29  £11,247.39  ▲ +13.1%
+Profit margin         49.5%       51.8%  ▼ -2.3 pts
+Orders                  148         142  ▲ +4.2%
+Average order       £173.77     £153.02  ▲ +13.6%
+Customers               114          97  ▲ +17.5%
+Units sold              371         361  ▲ +2.8%
+```
+
+- `previous_period()` gives the same length of time straight before. A
+  whole month gives the whole month before, even though months have
+  different numbers of days.
+- `same_period_last_year()` gives October 2025 for October 2026. A 29
+  February becomes 28 February.
+- **The margin shows "pts" (percentage points), not %.** If the margin
+  goes from 51.8% to 49.5%, saying "-4.4%" would confuse everyone. "-2.3
+  pts" says what really happened.
+- If there was nothing before, the change says "new" instead of dividing
+  by zero.
 
 ## Week plan
 

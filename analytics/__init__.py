@@ -6,6 +6,7 @@ wants to see: totals, trends, best sellers and customers.
     from analytics import CsvSalesSource, SalesCleaner
 """
 
+from .breakdowns import DIMENSIONS, SORT_KEYS, Breakdown, check_dimension, pivot
 from .cleaning import (
     CleaningReport,
     CleanResult,
@@ -13,6 +14,7 @@ from .cleaning import (
     add_money_columns,
     most_common_spelling,
 )
+from .comparison import Change, compare, latest_month, previous_period, same_period_last_year
 from .exceptions import AnalyticsError, DataError, ValidationError
 from .filters import AllOf, AnyOf, DateRange, Everything, IsOneOf, Not, SalesFilter
 from .metrics import (
@@ -33,7 +35,7 @@ from .metrics import (
 from .money import format_percent, format_pounds, to_pounds
 from .sources import REQUIRED_COLUMNS, CsvSalesSource, DataFrameSource, SalesSource
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "SalesSource",
@@ -65,6 +67,16 @@ __all__ = [
     "AllOf",
     "AnyOf",
     "Not",
+    "Breakdown",
+    "pivot",
+    "check_dimension",
+    "DIMENSIONS",
+    "SORT_KEYS",
+    "Change",
+    "compare",
+    "previous_period",
+    "same_period_last_year",
+    "latest_month",
     "to_pounds",
     "format_pounds",
     "format_percent",

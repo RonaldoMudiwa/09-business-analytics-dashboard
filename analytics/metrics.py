@@ -23,6 +23,8 @@ class Metric(ABC):
 
     name = ""
     label = ""
+    # True for numbers that are already a percentage, like the margin.
+    is_rate = False
 
     @abstractmethod
     def compute(self, sales: pd.DataFrame) -> float:
@@ -58,6 +60,7 @@ class ProfitMargin(Metric):
     """How much of each pound taken is profit. 0.5 means 50p in every £1."""
 
     name, label = "margin", "Profit margin"
+    is_rate = True
 
     def compute(self, sales: pd.DataFrame) -> float:
         revenue = sales["revenue_pence"].sum()
