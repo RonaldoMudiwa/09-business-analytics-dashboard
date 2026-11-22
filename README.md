@@ -9,9 +9,10 @@ APIs, NLP and search. This week is about data analysis with Pandas.
 
 ## Status
 
-Day 3 of 7. Reading sales files, cleaning messy rows with a report of what
-was fixed, money kept in whole pennies, KPIs, filters, breakdowns by month,
-category, region and product, pivot tables, and comparing periods. 92 tests.
+Day 4 of 7. Reading sales files, cleaning messy rows with a report of what
+was fixed, money kept in whole pennies, KPIs, filters, breakdowns, pivot
+tables, comparing periods, trends with two forecasts that are checked on
+real months, and customer segments. 133 tests.
 
 ## Getting started
 
@@ -232,6 +233,92 @@ Units sold              371         361  ▲ +2.8%
   pts" says what really happened.
 - If there was nothing before, the change says "new" instead of dividing
   by zero.
+
+## Trends and forecasts
+
+```python
+from analytics import LinearTrend, SeasonalNaive, backtest, monthly_series, rolling_average
+
+revenue = monthly_series(sales)          # one total per month, gaps filled with 0
+smooth = rolling_average(revenue, 3)     # each month averaged with the two before
+for forecaster in (LinearTrend(), SeasonalNaive()):
+    print(backtest(forecaster, revenue, holdout=6).text())
+    print(forecaster.predict(revenue, 3))
+```
+
+```
+Straight line trend: off by 16.5% on average over 6 months
+Same month last year, plus growth: off by 13.7% on average over 6 months
+```
+
+Monthly numbers jump about. A **rolling average** smooths them out, like
+judging your weight by the week instead of by the day.
+
+There are two forecasts behind a `Forecaster` base class:
+
+| Forecaster | How it guesses |
+| --- | --- |
+| `LinearTrend` | Draws the straight line that best fits the past (numpy's `polyfit`) and carries it on |
+| `SeasonalNaive` | Next December will be like last December, times however much the shop grew in the last year |
+
+**`backtest()` checks them honestly.** It hides the last 6 months, asks
+each forecaster to guess them, then compares with what really happened.
+It's like a practice exam: the answers exist, we just don't look until the
+forecast is written. On this data the seasonal one wins, because an
+outdoor shop's summers and Decembers matter more than its slow growth. A
+straight line can't see seasons at all.
+
+Neither is clever, and that's on purpose. A simple forecast you've
+checked is worth more than a fancy one you haven't. Forecasts never go
+below £0.
+
+## Customers
+
+```python
+from analytics import add_segments, customer_table, repeat_rate, segment_summary
+
+customers = add_segments(customer_table(sales))
+print(segment_summary(customers))
+print(f"{repeat_rate(sales):.0%} of customers came back")
+```
+
+```
+                  customers   revenue  share_of_revenue
+segment
+Champions               110  287407.0              53.7
+Loyal                    80   89946.0              16.8
+New or returning         28    6439.0               1.2
+At risk                  53   31191.0               5.8
+Lost                    114   26961.0               5.0
+Steady                  180   92871.0              17.4
+```
+
+(Revenue rounded to pounds and the share shown as a percentage here.)
+
+This is **RFM**, a method real shops use:
+
+- **Recency:** how long since they last bought. Recent is good.
+- **Frequency:** how many orders they've made. More is good.
+- **Monetary:** how much they've spent. More is good.
+
+Each customer gets 1 to 3 for each, by which third of customers they're
+in. Then simple rules, checked from the top, put them in a group:
+
+| Segment | Rule | What a shop might do |
+| --- | --- | --- |
+| Champions | Recent and frequent | Thank them, early access to sales |
+| Loyal | Frequent | Loyalty points |
+| New or returning | Recent but only one order | A welcome offer to bring them back |
+| At risk | Used to buy often, not lately | A "we miss you" discount |
+| Lost | Few orders, long ago | Not worth chasing hard |
+| Steady | Everyone else | Normal emails |
+
+It's like a gym sorting members into "comes every week", "used to come"
+and "just joined", so each group gets the right message. Here 110
+champions (about a fifth of customers) bring in over half the money.
+
+Each segment is a `SegmentRule` with a name, a meaning and a test, so
+the rules can be swapped without touching the code that applies them.
 
 ## Week plan
 

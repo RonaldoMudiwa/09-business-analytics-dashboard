@@ -15,6 +15,15 @@ from .cleaning import (
     most_common_spelling,
 )
 from .comparison import Change, compare, latest_month, previous_period, same_period_last_year
+from .customers import (
+    DEFAULT_SEGMENTS,
+    SegmentRule,
+    add_segments,
+    customer_table,
+    repeat_rate,
+    score,
+    segment_summary,
+)
 from .exceptions import AnalyticsError, DataError, ValidationError
 from .filters import AllOf, AnyOf, DateRange, Everything, IsOneOf, Not, SalesFilter
 from .metrics import (
@@ -34,8 +43,18 @@ from .metrics import (
 )
 from .money import format_percent, format_pounds, to_pounds
 from .sources import REQUIRED_COLUMNS, CsvSalesSource, DataFrameSource, SalesSource
+from .trends import (
+    Backtest,
+    Forecaster,
+    LinearTrend,
+    SeasonalNaive,
+    backtest,
+    growth,
+    monthly_series,
+    rolling_average,
+)
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "SalesSource",
@@ -77,6 +96,21 @@ __all__ = [
     "previous_period",
     "same_period_last_year",
     "latest_month",
+    "monthly_series",
+    "rolling_average",
+    "growth",
+    "Forecaster",
+    "LinearTrend",
+    "SeasonalNaive",
+    "Backtest",
+    "backtest",
+    "customer_table",
+    "add_segments",
+    "segment_summary",
+    "repeat_rate",
+    "score",
+    "SegmentRule",
+    "DEFAULT_SEGMENTS",
     "to_pounds",
     "format_pounds",
     "format_percent",
