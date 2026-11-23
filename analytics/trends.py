@@ -82,8 +82,11 @@ class LinearTrend(Forecaster):
 class SeasonalNaive(Forecaster):
     """Next October will be like last October, plus however much the shop has grown.
 
-    Growth is the last 12 months compared with the 12 before. It needs a
-    full year of history to work.
+    Growth is the last 12 months compared with the 12 before, so with less
+    than two years of history it assumes no growth. (Growth worked out from
+    just a few months was tried, and backtesting showed it made forecasts
+    worse, because a few months are too jumpy.) It needs a full year of
+    history to work at all.
     """
 
     name = "Same month last year, plus growth"

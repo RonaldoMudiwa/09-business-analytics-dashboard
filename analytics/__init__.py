@@ -7,6 +7,7 @@ wants to see: totals, trends, best sellers and customers.
 """
 
 from .breakdowns import DIMENSIONS, SORT_KEYS, Breakdown, check_dimension, pivot
+from .charts import BarChart, Chart, TrendChart
 from .cleaning import (
     CleaningReport,
     CleanResult,
@@ -23,6 +24,14 @@ from .customers import (
     repeat_rate,
     score,
     segment_summary,
+)
+from .dashboard import (
+    Dashboard,
+    DashboardRenderer,
+    HtmlDashboard,
+    TextDashboard,
+    build_dashboard,
+    pick_forecaster,
 )
 from .exceptions import AnalyticsError, DataError, ValidationError
 from .filters import AllOf, AnyOf, DateRange, Everything, IsOneOf, Not, SalesFilter
@@ -54,7 +63,7 @@ from .trends import (
     rolling_average,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "SalesSource",
@@ -111,6 +120,15 @@ __all__ = [
     "score",
     "SegmentRule",
     "DEFAULT_SEGMENTS",
+    "Chart",
+    "TrendChart",
+    "BarChart",
+    "Dashboard",
+    "build_dashboard",
+    "pick_forecaster",
+    "DashboardRenderer",
+    "TextDashboard",
+    "HtmlDashboard",
     "to_pounds",
     "format_pounds",
     "format_percent",

@@ -9,10 +9,9 @@ APIs, NLP and search. This week is about data analysis with Pandas.
 
 ## Status
 
-Day 4 of 7. Reading sales files, cleaning messy rows with a report of what
-was fixed, money kept in whole pennies, KPIs, filters, breakdowns, pivot
-tables, comparing periods, trends with two forecasts that are checked on
-real months, and customer segments. 133 tests.
+Day 5 of 7. Reading and cleaning sales, KPIs, filters, breakdowns, pivot
+tables, comparing periods, checked forecasts, customer segments, charts,
+and a dashboard as text or as one web page. 158 tests.
 
 ## Getting started
 
@@ -268,6 +267,11 @@ forecast is written. On this data the seasonal one wins, because an
 outdoor shop's summers and Decembers matter more than its slow growth. A
 straight line can't see seasons at all.
 
+With less than two years of history, `SeasonalNaive` assumes no growth.
+I tried working growth out from just the few months that overlap, and the
+backtest showed it made the forecast worse (off by 26% instead of 13.7%),
+because a few months jump about too much. So that idea was dropped.
+
 Neither is clever, and that's on purpose. A simple forecast you've
 checked is worth more than a fancy one you haven't. Forecasts never go
 below £0.
@@ -319,6 +323,50 @@ champions (about a fifth of customers) bring in over half the money.
 
 Each segment is a `SegmentRule` with a name, a meaning and a test, so
 the rules can be swapped without touching the code that applies them.
+
+## The dashboard
+
+```python
+from analytics import HtmlDashboard, IsOneOf, TextDashboard, build_dashboard
+
+board = build_dashboard(sales, "Outdoor shop sales")
+print(TextDashboard().render(board))
+HtmlDashboard().save(board, "data/dashboard.html")       # open it in a browser
+
+north = build_dashboard(sales, "North only", where=IsOneOf("region", ["North"]))
+```
+
+`build_dashboard()` does every sum once and puts the results in a
+`Dashboard` object. The renderers only show it:
+
+| Renderer | Gives you |
+| --- | --- |
+| `TextDashboard` | The whole thing in the terminal, with bars made of █ blocks |
+| `HtmlDashboard` | One web page: KPI cards with ▲▼ changes, a revenue chart with the forecast, bar charts and tables for categories, regions, channels and top products, customer segments, and every month in a table |
+
+Keeping the sums apart from the showing means the terminal and the web
+page can never disagree, and a new format (like Excel tomorrow) never
+touches the maths.
+
+A few details:
+
+- **The page is one file.** The charts are PNG pictures saved inside it
+  as text (base64), so it can be emailed and still work.
+- **Every chart has a table under it**, so the exact numbers are there
+  too, and nobody has to rely on colour alone.
+- **Everything from the data is escaped**, so a product called
+  `<script>` shows up as text and can't run as code.
+- **The forecast is chosen by its backtest:** whichever was more accurate
+  on known months is used, and the page says how accurate it was.
+- **It warns if the last month isn't over**, so a half finished month
+  doesn't look like a crash in sales.
+- **Files are written safely:** to a temp file first, then swapped in, so
+  a crash never leaves half a page.
+
+The charts use matplotlib's `Figure` object directly instead of `pyplot`,
+so no chart can leave anything behind that changes the next one. The
+colours were picked to be easy to tell apart, including for colour blind
+readers.
 
 ## Week plan
 
