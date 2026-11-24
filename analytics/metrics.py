@@ -116,6 +116,7 @@ class KPI:
     label: str
     value: float
     text: str
+    is_money: bool = False
 
 
 def calculate_kpis(sales: pd.DataFrame,
@@ -124,7 +125,8 @@ def calculate_kpis(sales: pd.DataFrame,
     kpis = []
     for metric in metrics:
         value = metric.compute(sales)
-        kpis.append(KPI(metric.name, metric.label, value, metric.format(value)))
+        kpis.append(KPI(metric.name, metric.label, value, metric.format(value),
+                        isinstance(metric, MoneyMetric)))
     return kpis
 
 

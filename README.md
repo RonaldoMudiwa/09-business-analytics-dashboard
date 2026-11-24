@@ -9,9 +9,10 @@ APIs, NLP and search. This week is about data analysis with Pandas.
 
 ## Status
 
-Day 5 of 7. Reading and cleaning sales, KPIs, filters, breakdowns, pivot
-tables, comparing periods, checked forecasts, customer segments, charts,
-and a dashboard as text or as one web page. 158 tests.
+Day 6 of 7. Reading and cleaning sales, KPIs, filters, breakdowns, pivot
+tables, comparing periods, checked forecasts, customer segments, charts, a
+dashboard as text, a web page or an Excel workbook, and a command line.
+188 tests.
 
 ## Getting started
 
@@ -21,6 +22,62 @@ python -m venv .venv
 pip install -r requirements.txt
 pytest --cov
 ```
+
+## Using it
+
+```bash
+python -m analytics demo                          # the whole dashboard for the sample data
+python -m analytics summary                       # KPIs and what the cleaner did
+python -m analytics breakdown --by region
+python -m analytics breakdown --by product --top 5 --sort units
+python -m analytics compare --month 2026-10 --vs last-year
+python -m analytics trend --forecast 6
+python -m analytics customers
+python -m analytics dashboard --html data/dashboard.html --excel data/dashboard.xlsx
+```
+
+Filters go **before** the command and work with every command:
+
+```bash
+python -m analytics --region London --from 2026-06-01 --to 2026-08-31 summary
+python -m analytics --category Camping --category Footwear dashboard --html data/kit.html
+```
+
+```
+2026-10-01 to 2026-10-31  vs  2025-10-01 to 2025-10-31
+
+  Revenue             £25,718.29    £18,711.28  ▲ +37.4%
+  Gross profit        £12,721.29     £9,315.28  ▲ +36.6%
+  Profit margin            49.5%         49.8%  ▼ -0.3 pts
+  Orders                     148           111  ▲ +33.3%
+  Average order          £173.77       £168.57  ▲ +3.1%
+  Customers                  114            88  ▲ +29.5%
+  Units sold                 371           272  ▲ +36.4%
+```
+
+| Command | What it does |
+| --- | --- |
+| `demo` | The whole dashboard for the made up sample data |
+| `summary` | The KPIs, the dates covered, and the cleaning report |
+| `breakdown --by X [--top N] [--sort S]` | Totals for each month, category, region, channel, product or customer |
+| `compare [--month YYYY-MM] [--vs previous\|last-year]` | One month against the month before or the same month last year |
+| `trend [--forecast N]` | Every month with a 3 month average, then both forecasts with how accurate each was |
+| `customers` | RFM segments, what each means, and how many customers came back |
+| `dashboard [--html file] [--excel file] [--title T]` | The whole dashboard, and saves it as a web page and/or Excel |
+
+| Filter | Example |
+| --- | --- |
+| `--from`, `--to` | `--from 2026-01-01 --to 2026-03-31` |
+| `--region` | `--region London --region "South East"` (give it more than once for "or") |
+| `--category` | `--category Camping` |
+| `--channel` | `--channel Online` |
+
+`--data` reads another sales file with the same columns.
+
+Each command is its own small class with a `name`, `help` and `run`, the
+same Command pattern as the last few weeks. `main()` returns 0 or 1 and
+prints `Error: ...` for anything that goes wrong, like a filter nothing
+matches, instead of a crash.
 
 ## The data
 
@@ -367,6 +424,26 @@ The charts use matplotlib's `Figure` object directly instead of `pyplot`,
 so no chart can leave anything behind that changes the next one. The
 colours were picked to be easy to tell apart, including for colour blind
 readers.
+
+## Excel
+
+```python
+from analytics import ExcelReport
+
+ExcelReport().save(board, "data/dashboard.xlsx")
+```
+
+One sheet per table: Summary, Monthly (with the forecast), Categories,
+Regions, Channels, Top products and Customers.
+
+Managers live in Excel, so the money is saved as **real numbers in
+pounds with a £ format**, not as text like "£1,234.56". That means they can
+still add things up and make their own charts. Percentages are real
+percentages too. Headings are bold, stay put when you scroll, and the
+columns are wide enough to read. It uses the openpyxl library.
+
+The Excel file is made from the same `Dashboard` object as the text and
+web versions, so all three always show the same numbers.
 
 ## Week plan
 

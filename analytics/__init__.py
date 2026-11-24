@@ -33,6 +33,7 @@ from .dashboard import (
     build_dashboard,
     pick_forecaster,
 )
+from .excel import ExcelReport
 from .exceptions import AnalyticsError, DataError, ValidationError
 from .filters import AllOf, AnyOf, DateRange, Everything, IsOneOf, Not, SalesFilter
 from .metrics import (
@@ -63,7 +64,7 @@ from .trends import (
     rolling_average,
 )
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "SalesSource",
@@ -129,6 +130,7 @@ __all__ = [
     "DashboardRenderer",
     "TextDashboard",
     "HtmlDashboard",
+    "ExcelReport",
     "to_pounds",
     "format_pounds",
     "format_percent",
